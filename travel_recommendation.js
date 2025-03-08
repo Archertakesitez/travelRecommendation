@@ -11,7 +11,11 @@ function search_destination(){
     .then(data => {
         let destination;
         let bool_country = false;
-        if (country_names.includes(input)){
+        let show_all_countries = false;
+        
+        if (input === "country" || input === "countries") {
+            show_all_countries = true;
+        } else if (country_names.includes(input)){
             destination = data.countries.find(item => input.includes(item.name.toLowerCase()));
             bool_country = true;
         } else{
@@ -25,7 +29,49 @@ function search_destination(){
                 destination['name'] = 'Beaches';
             }
         }
-        if (destination && bool_country) {
+        
+        if (show_all_countries) {
+            result.innerHTML += `<h2 class="category-title">Countries</h2>
+                                <div class="destination-grid">`;
+            
+            data.countries.forEach(country => {
+                const city = country.cities[0]; // Just showing the first city for each country
+                result.innerHTML += `
+                    <div class="destination-card">
+                        <h3>${country.name}</h3>
+                        <div class="image-container">
+                            <img src="${city.imageUrl}" alt="${city.name}">
+                        </div>
+                        <p>${country.description || city.description}</p>
+                    </div>`;
+            });
+            
+            result.innerHTML += `</div>`;
+            
+            // Add recommendations section
+            result.innerHTML += `<h2 class="category-title">Recommended Destinations</h2>
+                               <div class="destination-grid">`;
+            
+            // Select 2 random countries for recommendations
+            const recommendedCountries = [...data.countries]
+                .sort(() => 0.5 - Math.random())
+                .slice(0, 2);
+                
+            recommendedCountries.forEach(country => {
+                const city = country.cities[Math.floor(Math.random() * country.cities.length)]; // Random city
+                result.innerHTML += `
+                    <div class="destination-card recommended">
+                        <h3>${country.name} - ${city.name}</h3>
+                        <div class="image-container">
+                            <img src="${city.imageUrl}" alt="${city.name}">
+                        </div>
+                        <p>${city.description}</p>
+                        <span class="recommendation-badge">Recommended</span>
+                    </div>`;
+            });
+            
+            result.innerHTML += `</div>`;
+        } else if (destination && bool_country) {
             const city_one = destination.cities[0]; 
             const city_two = destination.cities[1];
             
